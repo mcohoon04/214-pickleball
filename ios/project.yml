@@ -1,0 +1,65 @@
+name: PickleBall214
+options:
+  bundleIdPrefix: com.214-pickle
+  deploymentTarget:
+    iOS: "16.0"
+  xcodeVersion: "15.3"
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+settings:
+  base:
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_IDENTITY: ""
+    CODE_SIGNING_REQUIRED: "NO"
+    INFOPLIST_FILE: PickleBall214/Info.plist
+
+targets:
+  PickleBall214:
+    type: application
+    platform: iOS
+    sources:
+      - path: PickleBall214
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.214-pickle
+        INFOPLIST_FILE: PickleBall214/Info.plist
+        GENERATE_INFOPLIST_FILE: false
+    info:
+      path: PickleBall214/Info.plist
+      properties:
+        CFBundleDisplayName: "214 Pickle"
+        CFBundleName: "PickleBall214"
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        GIDClientID: "849098110880-fpibqeeeofjqqnlku57n9nhf45kcpu4u.apps.googleusercontent.com"
+        CFBundleURLTypes:
+          - CFBundleURLSchemes:
+              - "com.googleusercontent.apps.849098110880-fpibqeeeofjqqnlku57n9nhf45kcpu4u"
+              - "com.214-pickle"
+            CFBundleTypeRole: Editor
+        UIBackgroundModes:
+          - remote-notification
+    dependencies:
+      - package: Supabase
+      - package: GoogleSignIn
+        product: GoogleSignIn
+      - package: GoogleSignIn
+        product: GoogleSignInSwift
+    entitlements:
+      path: PickleBall214/PickleBall214.entitlements
+      properties:
+        aps-environment: development
+        com.apple.developer.applesignin:
+          - Default
+
+packages:
+  Supabase:
+    url: https://github.com/supabase/supabase-swift.git
+    from: "2.0.0"
+  GoogleSignIn:
+    url: https://github.com/google/GoogleSignIn-iOS
+    from: "9.0.0"

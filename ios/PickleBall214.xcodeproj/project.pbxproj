@@ -1,0 +1,471 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0554E88F60906C1C5852031A /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 61B10E810334B53A90E691A3 /* Supabase */; };
+		2607E8C6EF18612F3E072EE7 /* PickleBall214App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DD808A8A837CE4D68A68A8B /* PickleBall214App.swift */; };
+		3503FCE735D1316264713EDF /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 14B1164D3AAA9E0B6AEDD833 /* GoogleSignInSwift */; };
+		6998B455B418BA9DD0EF8C17 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = B89B9AD0F9EAD4955BD60875 /* GoogleSignIn */; };
+		A9AB4AA8AB53CF6B61D3E78C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B29B65ADC8BA05D2DD7C0982 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		00E75C782BD3C97D1701D38E /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		1FAD7C587DE09754B6A57A18 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		38C9BF8639AF117E268B578B /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		3B03E7694EEBBF23ACA91E55 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		5DD808A8A837CE4D68A68A8B /* PickleBall214App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickleBall214App.swift; sourceTree = "<group>"; };
+		6B29EFB8B933B737BDD5FDEA /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		8C6683F8CAF6289FB0677920 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		9DE8CCAAAE337207F4D6C292 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		B29B65ADC8BA05D2DD7C0982 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		CBA85038A219D461A8F384EA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		D3FEF27963C5D00F8C020A55 /* PickleBall214.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PickleBall214.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DC2900528D202983B3BE080A /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		FB867183CE985A520D1A575D /* PickleBall214.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PickleBall214.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		48D7EB05B4941FB8CFCC9069 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0554E88F60906C1C5852031A /* Supabase in Frameworks */,
+				6998B455B418BA9DD0EF8C17 /* GoogleSignIn in Frameworks */,
+				3503FCE735D1316264713EDF /* GoogleSignInSwift in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		3D67DB7D76D8A56C908A01AB /* Booking */ = {
+			isa = PBXGroup;
+			children = (
+				8C6683F8CAF6289FB0677920 /* .gitkeep */,
+			);
+			path = Booking;
+			sourceTree = "<group>";
+		};
+		44256008B36908DA5497967F /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				3B03E7694EEBBF23ACA91E55 /* .gitkeep */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		4EA2CB9B22E6D9D4BCE1D198 /* Calendar */ = {
+			isa = PBXGroup;
+			children = (
+				00E75C782BD3C97D1701D38E /* .gitkeep */,
+			);
+			path = Calendar;
+			sourceTree = "<group>";
+		};
+		6D09BEA7FA7F9DCF2E972974 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				DC2900528D202983B3BE080A /* .gitkeep */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		6DB1265D8E3D2CDAFDA7FA37 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				9B298B6009B20F451F220ED8 /* Auth */,
+				3D67DB7D76D8A56C908A01AB /* Booking */,
+				4EA2CB9B22E6D9D4BCE1D198 /* Calendar */,
+				9CE21F4F662A2157109391E8 /* Profile */,
+				A43BCDFB771081B132C4A834 /* Schedule */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		762A235FCFD68133A59EF678 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				5DD808A8A837CE4D68A68A8B /* PickleBall214App.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		9B298B6009B20F451F220ED8 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				9DE8CCAAAE337207F4D6C292 /* .gitkeep */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		9CE21F4F662A2157109391E8 /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				38C9BF8639AF117E268B578B /* .gitkeep */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
+		9F9A4704FE2F41610D9E18BD = {
+			isa = PBXGroup;
+			children = (
+				A3EA9AF962BCBB9E345FBC8D /* PickleBall214 */,
+				EBF952A5510EF02B3FA30DA9 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A3EA9AF962BCBB9E345FBC8D /* PickleBall214 */ = {
+			isa = PBXGroup;
+			children = (
+				762A235FCFD68133A59EF678 /* App */,
+				6D09BEA7FA7F9DCF2E972974 /* Config */,
+				44256008B36908DA5497967F /* Models */,
+				CFE451D48707591875E3B226 /* Services */,
+				6DB1265D8E3D2CDAFDA7FA37 /* Views */,
+				B29B65ADC8BA05D2DD7C0982 /* Assets.xcassets */,
+				CBA85038A219D461A8F384EA /* Info.plist */,
+				FB867183CE985A520D1A575D /* PickleBall214.entitlements */,
+			);
+			path = PickleBall214;
+			sourceTree = "<group>";
+		};
+		A43BCDFB771081B132C4A834 /* Schedule */ = {
+			isa = PBXGroup;
+			children = (
+				1FAD7C587DE09754B6A57A18 /* .gitkeep */,
+			);
+			path = Schedule;
+			sourceTree = "<group>";
+		};
+		CFE451D48707591875E3B226 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				6B29EFB8B933B737BDD5FDEA /* .gitkeep */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		EBF952A5510EF02B3FA30DA9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D3FEF27963C5D00F8C020A55 /* PickleBall214.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		311736212511019C3B0BAF92 /* PickleBall214 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 74E543648DBA67B3870FB9C3 /* Build configuration list for PBXNativeTarget "PickleBall214" */;
+			buildPhases = (
+				CAED22382866EC959FBE3184 /* Sources */,
+				2B4A0AD92C634F89376FF64D /* Resources */,
+				48D7EB05B4941FB8CFCC9069 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PickleBall214;
+			packageProductDependencies = (
+				61B10E810334B53A90E691A3 /* Supabase */,
+				B89B9AD0F9EAD4955BD60875 /* GoogleSignIn */,
+				14B1164D3AAA9E0B6AEDD833 /* GoogleSignInSwift */,
+			);
+			productName = PickleBall214;
+			productReference = D3FEF27963C5D00F8C020A55 /* PickleBall214.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		526077510465DFA73E58755D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1530;
+				TargetAttributes = {
+					311736212511019C3B0BAF92 = {
+						DevelopmentTeam = "";
+					};
+				};
+			};
+			buildConfigurationList = 5AD2466413841CA4E29DD347 /* Build configuration list for PBXProject "PickleBall214" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 9F9A4704FE2F41610D9E18BD;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				877AE93A694513A3D96CEA0D /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				A997293D3BB1A841EE90AA4A /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = EBF952A5510EF02B3FA30DA9 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				311736212511019C3B0BAF92 /* PickleBall214 */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		2B4A0AD92C634F89376FF64D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A9AB4AA8AB53CF6B61D3E78C /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		CAED22382866EC959FBE3184 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2607E8C6EF18612F3E072EE7 /* PickleBall214App.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		201319ABAA4A557311771082 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = PickleBall214/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		5117AAB4DDEA2E8EC9612958 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = PickleBall214/PickleBall214.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PickleBall214/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.214-pickle";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		6A07D2124E129520C9472F0B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = PickleBall214/PickleBall214.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PickleBall214/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.214-pickle";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		D250144D871BE6F508D2C9E3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = PickleBall214/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5AD2466413841CA4E29DD347 /* Build configuration list for PBXProject "PickleBall214" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D250144D871BE6F508D2C9E3 /* Debug */,
+				201319ABAA4A557311771082 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		74E543648DBA67B3870FB9C3 /* Build configuration list for PBXNativeTarget "PickleBall214" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5117AAB4DDEA2E8EC9612958 /* Debug */,
+				6A07D2124E129520C9472F0B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		877AE93A694513A3D96CEA0D /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.0;
+			};
+		};
+		A997293D3BB1A841EE90AA4A /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		14B1164D3AAA9E0B6AEDD833 /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 877AE93A694513A3D96CEA0D /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+		61B10E810334B53A90E691A3 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A997293D3BB1A841EE90AA4A /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+		B89B9AD0F9EAD4955BD60875 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 877AE93A694513A3D96CEA0D /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 526077510465DFA73E58755D /* Project object */;
+}
