@@ -1,0 +1,29 @@
+# Supabase
+supabase/.env.local
+supabase/.env
+supabase/functions/.env
+
+# Xcode
+ios/**/*.xcuserdata/
+ios/**/DerivedData/
+ios/**/*.xcworkspace/xcuserdata/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# macOS
+.DS_Store
+
+# Secrets
+.env
+.env.local
+keys/
+*.p8
+
+# Remem
+.remem/
