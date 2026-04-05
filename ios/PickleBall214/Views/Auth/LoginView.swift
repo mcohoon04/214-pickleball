@@ -161,7 +161,7 @@ struct LoginView: View {
                         .cornerRadius(Theme.cornerRadius)
 
                         // Google Sign In
-                        GoogleSignInButton(style: .wide, action: signInWithGoogle)
+                        GoogleSignInButton(scheme: .light, style: .wide, action: signInWithGoogle)
                             .frame(height: 50)
                             .cornerRadius(Theme.cornerRadius)
 
