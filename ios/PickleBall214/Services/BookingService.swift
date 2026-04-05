@@ -105,6 +105,22 @@ final class BookingService {
             .execute()
     }
 
+    func leaveBooking(bookingId: UUID, playerId: UUID) async throws {
+        try await supabase
+            .from("booking_players")
+            .delete()
+            .eq("booking_id", value: bookingId)
+            .eq("player_id", value: playerId)
+            .execute()
+    }
+
+    func addPlayerToBooking(bookingId: UUID, playerId: UUID, addedBy: UUID) async throws {
+        try await supabase
+            .from("booking_players")
+            .insert(BookingPlayer(bookingId: bookingId, playerId: playerId, addedBy: addedBy))
+            .execute()
+    }
+
     func timeSlotsForDay(date: Date) -> [TimeSlot] {
         var cal = Calendar.current
         cal.timeZone = torontoTZ
