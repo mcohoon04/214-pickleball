@@ -4,6 +4,9 @@ import AuthenticationServices
 
 struct LoginView: View {
     @Environment(AuthService.self) var authService
+    @State private var inviteCode = ""
+    @State private var isCodeValid = false
+    @State private var isValidating = false
     @State private var email = ""
     @State private var password = ""
     @State private var errorMessage: String?
@@ -27,98 +30,170 @@ struct LoginView: View {
 
                     Spacer().frame(height: 20)
 
-                    // Email & Password
-                    VStack(spacing: 12) {
-                        TextField("Email", text: $email)
-                            .textFieldStyle(.plain)
-                            .keyboardType(.emailAddress)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
-                            .padding()
-                            .background(Theme.surface)
-                            .cornerRadius(Theme.cornerRadius)
-                            .foregroundStyle(Theme.textPrimary)
+                    if !isCodeValid {
+                        // MARK: - Invite Code Gate
+                        VStack(spacing: 16) {
+                            Text("Enter your invite code to continue")
+                                .font(.subheadline)
+                                .foregroundStyle(Theme.textSecondary)
 
-                        SecureField("Password", text: $password)
-                            .textFieldStyle(.plain)
-                            .padding()
-                            .background(Theme.surface)
-                            .cornerRadius(Theme.cornerRadius)
-                            .foregroundStyle(Theme.textPrimary)
-                    }
+                            TextField("Invite Code", text: $inviteCode)
+                                .textFieldStyle(.plain)
+                                .textInputAutocapitalization(.characters)
+                                .autocorrectionDisabled()
+                                .multilineTextAlignment(.center)
+                                .font(.title3.monospaced())
+                                .padding()
+                                .background(Theme.surface)
+                                .cornerRadius(Theme.cornerRadius)
+                                .foregroundStyle(Theme.textPrimary)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: Theme.cornerRadius)
+                                        .stroke(Theme.accent.opacity(0.5), lineWidth: 1)
+                                )
 
-                    // Error
-                    if let errorMessage {
-                        Text(errorMessage)
-                            .font(.caption)
-                            .foregroundStyle(Theme.destructive)
-                    }
-
-                    // Sign In button
-                    Button {
-                        signIn()
-                    } label: {
-                        Group {
-                            if isLoading {
-                                ProgressView().tint(Theme.textOnAccent)
-                            } else {
-                                Text("Sign In")
-                                    .fontWeight(.semibold)
+                            if let errorMessage {
+                                Text(errorMessage)
+                                    .font(.caption)
+                                    .foregroundStyle(Theme.destructive)
                             }
+
+                            Button {
+                                validateCode()
+                            } label: {
+                                Group {
+                                    if isValidating {
+                                        ProgressView().tint(Theme.textOnAccent)
+                                    } else {
+                                        Text("Continue")
+                                            .fontWeight(.semibold)
+                                    }
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(inviteCode.isEmpty ? Theme.disabled : Theme.accent)
+                                .foregroundStyle(Theme.textOnAccent)
+                                .cornerRadius(Theme.cornerRadius)
+                            }
+                            .disabled(inviteCode.isEmpty || isValidating)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Theme.accent)
-                        .foregroundStyle(Theme.textOnAccent)
-                        .cornerRadius(Theme.cornerRadius)
-                    }
-                    .disabled(email.isEmpty || password.isEmpty || isLoading)
+                    } else {
+                        // MARK: - Sign In (unlocked after valid code)
 
-                    // Divider
-                    HStack {
-                        Rectangle().frame(height: 1).foregroundStyle(Theme.surface)
-                        Text("or").foregroundStyle(Theme.textSecondary).font(.caption)
-                        Rectangle().frame(height: 1).foregroundStyle(Theme.surface)
-                    }
+                        // Email & Password
+                        VStack(spacing: 12) {
+                            TextField("Email", text: $email)
+                                .textFieldStyle(.plain)
+                                .keyboardType(.emailAddress)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                                .padding()
+                                .background(Theme.surface)
+                                .cornerRadius(Theme.cornerRadius)
+                                .foregroundStyle(Theme.textPrimary)
 
-                    // Apple Sign In
-                    SignInWithAppleButton(.signIn) { request in
-                        let nonce = AuthService.randomNonce()
-                        currentNonce = nonce
-                        request.requestedScopes = [.fullName, .email]
-                        request.nonce = AuthService.sha256(nonce)
-                    } onCompletion: { result in
-                        handleAppleSignIn(result)
-                    }
-                    .signInWithAppleButtonStyle(.white)
-                    .frame(height: 50)
-                    .cornerRadius(Theme.cornerRadius)
+                            SecureField("Password", text: $password)
+                                .textFieldStyle(.plain)
+                                .padding()
+                                .background(Theme.surface)
+                                .cornerRadius(Theme.cornerRadius)
+                                .foregroundStyle(Theme.textPrimary)
+                        }
 
-                    // Google Sign In
-                    GoogleSignInButton(style: .wide, action: signInWithGoogle)
+                        // Error
+                        if let errorMessage {
+                            Text(errorMessage)
+                                .font(.caption)
+                                .foregroundStyle(Theme.destructive)
+                        }
+
+                        // Sign In button
+                        Button {
+                            signIn()
+                        } label: {
+                            Group {
+                                if isLoading {
+                                    ProgressView().tint(Theme.textOnAccent)
+                                } else {
+                                    Text("Sign In")
+                                        .fontWeight(.semibold)
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Theme.accent)
+                            .foregroundStyle(Theme.textOnAccent)
+                            .cornerRadius(Theme.cornerRadius)
+                        }
+                        .disabled(email.isEmpty || password.isEmpty || isLoading)
+
+                        // Divider
+                        HStack {
+                            Rectangle().frame(height: 1).foregroundStyle(Theme.surface)
+                            Text("or").foregroundStyle(Theme.textSecondary).font(.caption)
+                            Rectangle().frame(height: 1).foregroundStyle(Theme.surface)
+                        }
+
+                        // Apple Sign In
+                        SignInWithAppleButton(.signIn) { request in
+                            let nonce = AuthService.randomNonce()
+                            currentNonce = nonce
+                            request.requestedScopes = [.fullName, .email]
+                            request.nonce = AuthService.sha256(nonce)
+                        } onCompletion: { result in
+                            handleAppleSignIn(result)
+                        }
+                        .signInWithAppleButtonStyle(.white)
                         .frame(height: 50)
                         .cornerRadius(Theme.cornerRadius)
 
-                    Spacer()
+                        // Google Sign In
+                        GoogleSignInButton(style: .wide, action: signInWithGoogle)
+                            .frame(height: 50)
+                            .cornerRadius(Theme.cornerRadius)
 
-                    // Sign Up link
-                    NavigationLink {
-                        SignUpView()
-                            .environment(authService)
-                    } label: {
-                        HStack {
-                            Text("Don't have an account?")
-                                .foregroundStyle(Theme.textSecondary)
-                            Text("Sign Up")
-                                .foregroundStyle(Theme.accent)
-                                .fontWeight(.semibold)
+                        Spacer()
+
+                        // Sign Up link
+                        NavigationLink {
+                            SignUpView()
+                                .environment(authService)
+                        } label: {
+                            HStack {
+                                Text("Don't have an account?")
+                                    .foregroundStyle(Theme.textSecondary)
+                                Text("Sign Up")
+                                    .foregroundStyle(Theme.accent)
+                                    .fontWeight(.semibold)
+                            }
+                            .font(.subheadline)
                         }
-                        .font(.subheadline)
                     }
                 }
                 .padding(.horizontal, Theme.padding)
             }
             .background(Theme.background.ignoresSafeArea())
+        }
+    }
+
+    private func validateCode() {
+        isValidating = true
+        errorMessage = nil
+        Task {
+            do {
+                let valid: Bool = try await SupabaseConfig.client
+                    .rpc("validate_invite_code", params: ["p_code": inviteCode])
+                    .execute()
+                    .value
+                if valid {
+                    withAnimation { isCodeValid = true }
+                } else {
+                    errorMessage = "Invalid invite code"
+                }
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isValidating = false
         }
     }
 
