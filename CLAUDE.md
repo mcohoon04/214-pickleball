@@ -91,5 +91,10 @@ The `docs/` directory contains verified research with source citations:
 **Distribution:**
 - `ios-app-distribution.md` - TestFlight and App Store distribution steps
 
-**Design:**
+**App Store:**
+- `app-store-submission.md` - Complete field-by-field App Store Connect guide
+
+**Design & Plans:**
 - `plans/2026-04-04-design-review.md` - All architecture decisions with rationale
+- `plans/2026-04-04-implementation-plan.md` - Original implementation plan (Phase 0-5)
+- `plans/2026-04-05-post-implementation-changes.md` - All bug fixes and feature changes after initial implementation (MUST READ for future platforms)
