@@ -25,16 +25,22 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.214-pickle
         INFOPLIST_FILE: PickleBall214/Info.plist
         GENERATE_INFOPLIST_FILE: false
+        TARGETED_DEVICE_FAMILY: "1"
     info:
       path: PickleBall214/Info.plist
       properties:
         CFBundleDisplayName: "214 Pickle"
-        CFBundleName: "PickleBall214"
+        CFBundleName: "214 Pickle"
         CFBundleShortVersionString: "1.0"
         CFBundleVersion: "1"
-        UILaunchScreen: {}
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+          UIImageName: LaunchIcon
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
         GIDClientID: "849098110880-fpibqeeeofjqqnlku57n9nhf45kcpu4u.apps.googleusercontent.com"
         CFBundleURLTypes:
           - CFBundleURLSchemes:
