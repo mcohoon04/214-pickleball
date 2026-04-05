@@ -3,7 +3,6 @@ import SwiftUI
 struct SignUpView: View {
     @Environment(AuthService.self) var authService
     @Environment(\.dismiss) var dismiss
-    @State private var inviteCode = ""
     @State private var displayName = ""
     @State private var email = ""
     @State private var password = ""
@@ -19,24 +18,11 @@ struct SignUpView: View {
                     .font(.system(size: 28, weight: .bold))
                     .foregroundStyle(Theme.textPrimary)
 
-                Text("Enter your invite code to get started")
+                Text("Set up your player profile")
                     .font(.subheadline)
                     .foregroundStyle(Theme.textSecondary)
 
                 VStack(spacing: 12) {
-                    TextField("Invite Code", text: $inviteCode)
-                        .textFieldStyle(.plain)
-                        .textInputAutocapitalization(.characters)
-                        .autocorrectionDisabled()
-                        .padding()
-                        .background(Theme.surface)
-                        .cornerRadius(Theme.cornerRadius)
-                        .foregroundStyle(Theme.textPrimary)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                                .stroke(Theme.accent.opacity(0.5), lineWidth: 1)
-                        )
-
                     TextField("Display Name", text: $displayName)
                         .textFieldStyle(.plain)
                         .textInputAutocapitalization(.words)
@@ -55,7 +41,7 @@ struct SignUpView: View {
                         .cornerRadius(Theme.cornerRadius)
                         .foregroundStyle(Theme.textPrimary)
 
-                    SecureField("Password", text: $password)
+                    SecureField("Password (min 6 characters)", text: $password)
                         .textFieldStyle(.plain)
                         .padding()
                         .background(Theme.surface)
@@ -118,7 +104,7 @@ struct SignUpView: View {
     }
 
     private var isFormValid: Bool {
-        !inviteCode.isEmpty && !displayName.isEmpty && !email.isEmpty && password.count >= 6
+        !displayName.isEmpty && !email.isEmpty && password.count >= 6
     }
 
     private func signUp() {
@@ -129,8 +115,7 @@ struct SignUpView: View {
                 try await authService.signUp(
                     email: email,
                     password: password,
-                    displayName: displayName,
-                    inviteCode: inviteCode
+                    displayName: displayName
                 )
             } catch {
                 errorMessage = error.localizedDescription

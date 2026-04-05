@@ -7,6 +7,7 @@ import CryptoKit
 @Observable
 final class AuthService {
     var currentUser: Profile?
+    var currentEmail: String?
     var isAuthenticated = false
     var isLoading = true
 
@@ -40,13 +41,7 @@ final class AuthService {
 
     // MARK: - Email/Password
 
-    func signUp(email: String, password: String, displayName: String, inviteCode: String) async throws {
-        let isValid: Bool = try await supabase
-            .rpc("validate_invite_code", params: ["p_code": inviteCode])
-            .execute()
-            .value
-        guard isValid else { throw AuthError.invalidInviteCode }
-
+    func signUp(email: String, password: String, displayName: String) async throws {
         try await supabase.auth.signUp(
             email: email,
             password: password,
@@ -138,6 +133,10 @@ final class AuthService {
 
     // MARK: - Sign Out
 
+    func resetPassword(email: String) async throws {
+        try await supabase.auth.resetPasswordForEmail(email)
+    }
+
     func signOut() async throws {
         try await supabase.auth.signOut()
         GIDSignIn.sharedInstance.signOut()
@@ -146,7 +145,9 @@ final class AuthService {
     // MARK: - Profile
 
     func loadProfile() async {
-        guard let userId = try? await supabase.auth.session.user.id else { return }
+        guard let session = try? await supabase.auth.session else { return }
+        let userId = session.user.id
+        await MainActor.run { self.currentEmail = session.user.email }
         do {
             let profile: Profile = try await supabase
                 .from("profiles")

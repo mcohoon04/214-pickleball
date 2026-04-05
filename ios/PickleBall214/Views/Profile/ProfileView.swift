@@ -6,104 +6,124 @@ struct ProfileView: View {
     @State private var displayName = ""
     @State private var pushEnabled = true
     @State private var emailEnabled = true
-    @State private var isLoading = false
     @State private var isSaving = false
     @State private var errorMessage: String?
+    @State private var showSuccess = false
 
     var body: some View {
-        List {
-            // Profile section
-            Section {
-                HStack(spacing: 16) {
-                    Circle()
-                        .fill(Theme.accent.opacity(0.2))
-                        .frame(width: 60, height: 60)
-                        .overlay(
-                            Text(String(displayName.prefix(1)).uppercased())
-                                .font(.title2.bold())
-                                .foregroundStyle(Theme.accent)
-                        )
+        ScrollView {
+            VStack(spacing: 24) {
+                // Avatar
+                Circle()
+                    .fill(Theme.accent.opacity(0.2))
+                    .frame(width: 80, height: 80)
+                    .overlay(
+                        Text(String(displayName.prefix(1)).uppercased())
+                            .font(.largeTitle.bold())
+                            .foregroundStyle(Theme.accent)
+                    )
+                    .padding(.top, 20)
 
-                    VStack(alignment: .leading, spacing: 4) {
-                        TextField("Display Name", text: $displayName)
-                            .font(.headline)
-                            .foregroundStyle(Theme.textPrimary)
+                // Display Name
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Display Name")
+                        .font(.caption)
+                        .foregroundStyle(Theme.textSecondary)
 
-                        if let email = authService.currentUser?.id.uuidString {
-                            Text("ID: \(email.prefix(8))...")
-                                .font(.caption)
-                                .foregroundStyle(Theme.textSecondary)
+                    TextField("Your name", text: $displayName)
+                        .textFieldStyle(.plain)
+                        .textInputAutocapitalization(.words)
+                        .padding()
+                        .background(Theme.surface)
+                        .cornerRadius(Theme.cornerRadius)
+                        .foregroundStyle(Theme.textPrimary)
+                }
+
+                // Email (read-only)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Email")
+                        .font(.caption)
+                        .foregroundStyle(Theme.textSecondary)
+
+                    Text(authService.currentEmail ?? "—")
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Theme.surface)
+                        .cornerRadius(Theme.cornerRadius)
+                        .foregroundStyle(Theme.textSecondary)
+                }
+
+                // Notifications
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Notifications")
+                        .font(.caption)
+                        .foregroundStyle(Theme.textSecondary)
+
+                    VStack(spacing: 0) {
+                        Toggle(isOn: $pushEnabled) {
+                            Label("Push Notifications", systemImage: "bell.fill")
+                                .foregroundStyle(Theme.textPrimary)
                         }
+                        .tint(Theme.accent)
+                        .padding()
+
+                        Divider().background(Theme.background)
+
+                        Toggle(isOn: $emailEnabled) {
+                            Label("Email Notifications", systemImage: "envelope.fill")
+                                .foregroundStyle(Theme.textPrimary)
+                        }
+                        .tint(Theme.accent)
+                        .padding()
                     }
+                    .background(Theme.surface)
+                    .cornerRadius(Theme.cornerRadius)
                 }
-                .listRowBackground(Theme.surface)
-            }
 
-            // Notifications section
-            Section("Notifications") {
-                Toggle(isOn: $pushEnabled) {
-                    Label("Push Notifications", systemImage: "bell.fill")
-                        .foregroundStyle(Theme.textPrimary)
+                // Error / Success
+                if let errorMessage {
+                    Text(errorMessage)
+                        .font(.caption)
+                        .foregroundStyle(Theme.destructive)
                 }
-                .tint(Theme.accent)
-                .listRowBackground(Theme.surface)
 
-                Toggle(isOn: $emailEnabled) {
-                    Label("Email Notifications", systemImage: "envelope.fill")
-                        .foregroundStyle(Theme.textPrimary)
-                }
-                .tint(Theme.accent)
-                .listRowBackground(Theme.surface)
-            }
-
-            // Save button
-            Section {
+                // Save button
                 Button {
                     save()
                 } label: {
-                    HStack {
-                        Spacer()
+                    Group {
                         if isSaving {
                             ProgressView().tint(Theme.textOnAccent)
                         } else {
                             Text("Save Changes")
                                 .fontWeight(.semibold)
                         }
-                        Spacer()
                     }
-                    .padding(.vertical, 4)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Theme.accent)
+                    .foregroundStyle(Theme.textOnAccent)
+                    .cornerRadius(Theme.cornerRadius)
                 }
-                .listRowBackground(Theme.accent)
-                .foregroundStyle(Theme.textOnAccent)
-                .disabled(isSaving)
-            }
+                .disabled(isSaving || displayName.isEmpty)
 
-            if let errorMessage {
-                Section {
-                    Text(errorMessage)
-                        .foregroundStyle(Theme.destructive)
-                        .font(.caption)
-                        .listRowBackground(Theme.background)
-                }
-            }
+                Spacer().frame(height: 20)
 
-            // Sign out
-            Section {
+                // Sign out
                 Button {
                     signOut()
                 } label: {
-                    HStack {
-                        Spacer()
-                        Text("Sign Out")
-                            .fontWeight(.semibold)
-                        Spacer()
-                    }
+                    Text("Sign Out")
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Theme.surface)
+                        .foregroundStyle(Theme.destructive)
+                        .cornerRadius(Theme.cornerRadius)
                 }
-                .foregroundStyle(Theme.destructive)
-                .listRowBackground(Theme.surface)
             }
+            .padding(.horizontal, Theme.padding)
         }
-        .scrollContentBackground(.hidden)
         .background(Theme.background.ignoresSafeArea())
         .navigationTitle("Profile")
         .navigationBarTitleDisplayMode(.inline)
@@ -112,6 +132,11 @@ struct ProfileView: View {
                 Button("Done") { dismiss() }
                     .foregroundStyle(Theme.accent)
             }
+        }
+        .alert("Saved", isPresented: $showSuccess) {
+            Button("OK") { dismiss() }
+        } message: {
+            Text("Your profile has been updated.")
         }
         .onAppear {
             if let profile = authService.currentUser {
@@ -132,7 +157,7 @@ struct ProfileView: View {
                     pushEnabled: pushEnabled,
                     emailEnabled: emailEnabled
                 )
-                dismiss()
+                showSuccess = true
             } catch {
                 errorMessage = error.localizedDescription
             }

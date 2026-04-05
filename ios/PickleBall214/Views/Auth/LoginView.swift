@@ -12,6 +12,9 @@ struct LoginView: View {
     @State private var errorMessage: String?
     @State private var isLoading = false
     @State private var currentNonce: String?
+    @State private var showForgotPassword = false
+    @State private var resetEmail = ""
+    @State private var resetSent = false
 
     var body: some View {
         NavigationStack {
@@ -127,6 +130,16 @@ struct LoginView: View {
                         }
                         .disabled(email.isEmpty || password.isEmpty || isLoading)
 
+                        // Forgot password
+                        Button {
+                            resetEmail = email
+                            showForgotPassword = true
+                        } label: {
+                            Text("Forgot Password?")
+                                .font(.subheadline)
+                                .foregroundStyle(Theme.accent)
+                        }
+
                         // Divider
                         HStack {
                             Rectangle().frame(height: 1).foregroundStyle(Theme.surface)
@@ -173,6 +186,29 @@ struct LoginView: View {
                 .padding(.horizontal, Theme.padding)
             }
             .background(Theme.background.ignoresSafeArea())
+            .alert("Reset Password", isPresented: $showForgotPassword) {
+                TextField("Email", text: $resetEmail)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                Button("Send Reset Link") {
+                    Task {
+                        do {
+                            try await authService.resetPassword(email: resetEmail)
+                            resetSent = true
+                        } catch {
+                            errorMessage = error.localizedDescription
+                        }
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Enter your email and we'll send you a password reset link.")
+            }
+            .alert("Check Your Email", isPresented: $resetSent) {
+                Button("OK") {}
+            } message: {
+                Text("If an account exists with that email, you'll receive a password reset link shortly.")
+            }
         }
     }
 
