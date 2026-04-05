@@ -2,7 +2,7 @@ name: PickleBall214
 options:
   bundleIdPrefix: com.214-pickle
   deploymentTarget:
-    iOS: "16.0"
+    iOS: "17.0"
   xcodeVersion: "15.3"
   createIntermediateGroups: true
   groupSortPosition: top
