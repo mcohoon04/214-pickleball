@@ -6,26 +6,91 @@ struct BookingCreateView: View {
     @Environment(BookingService.self) var bookingService
     @Environment(AuthService.self) var authService
     @State private var selectedPlayerIds: Set<UUID> = []
+    @State private var selectedEndTime: Date?
     @State private var isLoading = false
     @State private var errorMessage: String?
 
-    private static let formatter: DateFormatter = {
+    private static let dateFormatter: DateFormatter = {
         let f = DateFormatter()
-        f.dateFormat = "EEEE, MMM d 'at' h a"
+        f.dateFormat = "EEEE, MMM d"
         f.timeZone = TimeZone(identifier: "America/Toronto")
         return f
     }()
 
+    private static let timeFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "h a"
+        f.timeZone = TimeZone(identifier: "America/Toronto")
+        return f
+    }()
+
+    private var availableEndTimes: [Date] {
+        bookingService.availableEndTimes(date: slot.date, startHour: slot.hour)
+    }
+
+    private var endTimeLabel: String {
+        guard let end = selectedEndTime else { return "Select" }
+        return Self.timeFormatter.string(from: end)
+    }
+
+    private var durationHours: Int {
+        guard let end = selectedEndTime else { return 0 }
+        let cal = Calendar.current
+        return cal.dateComponents([.hour], from: slot.date, to: end).hour ?? 0
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            // Header
-            VStack(spacing: 8) {
-                Text(Self.formatter.string(from: slot.date))
+            // Header — date, start time, end time picker
+            VStack(spacing: 12) {
+                Text(Self.dateFormatter.string(from: slot.date))
                     .font(.title3.bold())
                     .foregroundStyle(Theme.textPrimary)
-                Text("1 hour session")
-                    .font(.subheadline)
-                    .foregroundStyle(Theme.textSecondary)
+
+                HStack(spacing: 8) {
+                    // Start time (fixed)
+                    Text(Self.timeFormatter.string(from: slot.date))
+                        .font(.title2.bold())
+                        .foregroundStyle(Theme.accent)
+
+                    Text("to")
+                        .foregroundStyle(Theme.textSecondary)
+
+                    // End time (dropdown)
+                    Menu {
+                        ForEach(availableEndTimes, id: \.self) { endTime in
+                            Button {
+                                selectedEndTime = endTime
+                            } label: {
+                                HStack {
+                                    Text(Self.timeFormatter.string(from: endTime))
+                                    let hours = Calendar.current.dateComponents([.hour], from: slot.date, to: endTime).hour ?? 0
+                                    Text("(\(hours)hr)")
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text(endTimeLabel)
+                                .font(.title2.bold())
+                                .foregroundStyle(Theme.accent)
+                            Image(systemName: "chevron.down")
+                                .font(.caption.bold())
+                                .foregroundStyle(Theme.accent)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Theme.surfaceLight)
+                        .cornerRadius(8)
+                    }
+                }
+
+                if durationHours > 0 {
+                    Text("\(durationHours) hour\(durationHours > 1 ? "s" : "")")
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
+                }
             }
             .padding(.vertical, 20)
 
@@ -57,7 +122,6 @@ struct BookingCreateView: View {
                             }
                         } label: {
                             HStack(spacing: 12) {
-                                // Avatar placeholder
                                 Circle()
                                     .fill(Theme.accent.opacity(0.2))
                                     .frame(width: 40, height: 40)
@@ -113,11 +177,11 @@ struct BookingCreateView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(selectedPlayerIds.count >= 2 ? Theme.accent : Theme.disabled)
+                .background(canBook ? Theme.accent : Theme.disabled)
                 .foregroundStyle(Theme.textOnAccent)
                 .cornerRadius(Theme.cornerRadius)
             }
-            .disabled(selectedPlayerIds.count < 2 || isLoading)
+            .disabled(!canBook || isLoading)
             .padding(Theme.padding)
         }
         .background(Theme.background.ignoresSafeArea())
@@ -128,16 +192,26 @@ struct BookingCreateView: View {
             if let userId = authService.currentUser?.id {
                 selectedPlayerIds.insert(userId)
             }
+            // Default to 1 hour
+            if let firstEnd = availableEndTimes.first {
+                selectedEndTime = firstEnd
+            }
         }
     }
 
+    private var canBook: Bool {
+        selectedPlayerIds.count >= 2 && selectedEndTime != nil
+    }
+
     private func createBooking() {
+        guard let endTime = selectedEndTime else { return }
         isLoading = true
         errorMessage = nil
         Task {
             do {
                 _ = try await bookingService.createBooking(
                     startsAt: slot.date,
+                    endsAt: endTime,
                     playerIds: Array(selectedPlayerIds)
                 )
                 path.removeLast(path.count)

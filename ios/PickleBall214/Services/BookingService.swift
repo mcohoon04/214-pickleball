@@ -81,20 +81,47 @@ final class BookingService {
         await MainActor.run { self.allPlayers = players }
     }
 
-    func createBooking(startsAt: Date, playerIds: [UUID]) async throws -> UUID {
+    func createBooking(startsAt: Date, endsAt: Date, playerIds: [UUID]) async throws -> UUID {
         struct Params: Encodable {
             let p_starts_at: String
+            let p_ends_at: String
             let p_player_ids: [UUID]
         }
 
         let result: UUID = try await supabase
             .rpc("create_booking", params: Params(
                 p_starts_at: startsAt.ISO8601Format(),
+                p_ends_at: endsAt.ISO8601Format(),
                 p_player_ids: playerIds
             ))
             .execute()
             .value
         return result
+    }
+
+    /// Returns available end times for a booking starting at `startHour` on `date`.
+    /// Ranges from startHour+1 up to the next existing booking or 9 PM (hour 21), max 4 hours.
+    func availableEndTimes(date: Date, startHour: Int) -> [Date] {
+        var cal = Calendar.current
+        cal.timeZone = torontoTZ
+        let dayStart = cal.startOfDay(for: date)
+
+        // Find the next booking after startHour on this day
+        let nextBookingHour = bookingsForDay
+            .map { bwp -> Int in
+                var c = Calendar.current
+                c.timeZone = torontoTZ
+                return c.component(.hour, from: bwp.booking.startsAt)
+            }
+            .filter { $0 > startHour }
+            .sorted()
+            .first ?? 21 // 9 PM end of court hours
+
+        let maxEndHour = min(nextBookingHour, startHour + 4, 21) // cap at 4 hours and 9 PM
+
+        return ((startHour + 1)...maxEndHour).compactMap { hour in
+            cal.date(bySettingHour: hour, minute: 0, second: 0, of: dayStart)
+        }
     }
 
     func cancelBooking(id: UUID) async throws {
@@ -128,11 +155,14 @@ final class BookingService {
 
         return (5...20).map { hour in
             let slotDate = cal.date(bySettingHour: hour, minute: 0, second: 0, of: dayStart)!
+            // Match any booking whose range covers this hour (start <= hour < end)
             let match = bookingsForDay.first { bwp in
                 var c = Calendar.current
                 c.timeZone = torontoTZ
-                let bookingHour = c.component(.hour, from: bwp.booking.startsAt)
-                return c.isDate(bwp.booking.startsAt, inSameDayAs: date) && bookingHour == hour
+                let startHour = c.component(.hour, from: bwp.booking.startsAt)
+                let endHour = c.component(.hour, from: bwp.booking.endsAt)
+                let sameDay = c.isDate(bwp.booking.startsAt, inSameDayAs: date)
+                return sameDay && hour >= startHour && hour < endHour
             }
             return TimeSlot(hour: hour, date: slotDate, booking: match)
         }
