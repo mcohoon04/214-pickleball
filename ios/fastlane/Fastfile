@@ -1,0 +1,54 @@
+default_platform(:ios)
+
+platform :ios do
+  before_all do
+    app_store_connect_api_key(
+      key_id: "TM6A6P2MZH",
+      issuer_id: "0be1c2d4-ad14-4265-8ff5-5201ada5fd70",
+      key_filepath: "../keys/AuthKey_TM6A6P2MZH.p8",
+      in_house: false
+    )
+  end
+
+  desc "Push metadata and screenshots to App Store Connect"
+  lane :metadata do
+    deliver(
+      app_identifier: "com.214-pickle",
+      skip_binary_upload: true,
+      skip_screenshots: false,
+      overwrite_screenshots: true,
+      force: true,
+      automatic_release: false,
+      submit_for_review: false,
+      precheck_include_in_app_purchases: false,
+      submission_information: {
+        export_compliance_uses_encryption: false,
+        export_compliance_is_exempt: false,
+        export_compliance_contains_proprietary_cryptography: false,
+        export_compliance_contains_third_party_cryptography: false
+      },
+      app_rating_config_path: "fastlane/rating_config.json"
+    )
+  end
+
+  desc "Push metadata and submit for review"
+  lane :submit do
+    deliver(
+      app_identifier: "com.214-pickle",
+      skip_binary_upload: true,
+      skip_screenshots: false,
+      overwrite_screenshots: true,
+      force: true,
+      automatic_release: false,
+      submit_for_review: true,
+      precheck_include_in_app_purchases: false,
+      submission_information: {
+        export_compliance_uses_encryption: false,
+        export_compliance_is_exempt: false,
+        export_compliance_contains_proprietary_cryptography: false,
+        export_compliance_contains_third_party_cryptography: false
+      },
+      app_rating_config_path: "fastlane/rating_config.json"
+    )
+  end
+end

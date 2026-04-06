@@ -47,6 +47,7 @@ targets:
               - "com.googleusercontent.apps.849098110880-fpibqeeeofjqqnlku57n9nhf45kcpu4u"
               - "com.214-pickle"
             CFBundleTypeRole: Editor
+        ITSAppUsesNonExemptEncryption: false
         UIBackgroundModes:
           - remote-notification
     dependencies:

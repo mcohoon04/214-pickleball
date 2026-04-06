@@ -34,6 +34,8 @@
 	<string>1</string>
 	<key>GIDClientID</key>
 	<string>849098110880-fpibqeeeofjqqnlku57n9nhf45kcpu4u.apps.googleusercontent.com</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

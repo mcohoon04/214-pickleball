@@ -1,0 +1,21 @@
+214 Pickle is a private pickleball court scheduling app designed for small groups. Book your court time, invite players, and stay organized — all in one place.
+
+SHARED CALENDAR
+See all bookings at a glance with a clean month view. Green dots show which days have games scheduled. Tap any day to see the full hour-by-hour schedule.
+
+EASY BOOKING
+Pick an available time slot (5 AM – 9 PM), choose how long (1-4 hours), select 2-4 players from your group, and book the court with one tap. Everyone gets notified instantly.
+
+REAL-TIME UPDATES
+Bookings appear live for all members — no refreshing needed. See what's available right now, without calling or texting.
+
+NOTIFICATIONS
+Get push notifications and emails when you're added to a game, when a booking is cancelled, and a reminder 1 hour before your match.
+
+FLEXIBLE SCHEDULING
+Book 1 to 4 hour sessions. Players can leave a booking or add others without needing the organizer. The court is yours to manage as a group.
+
+PRIVATE & INVITE-ONLY
+Access is controlled by invite code. Only members with a valid code can join. Your group, your court, your schedule.
+
+Built for small groups who share a private court. No payments, no ads, no complexity. Just book and play.
