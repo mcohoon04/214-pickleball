@@ -1,4 +1,7 @@
-214 Pickle is a private pickleball court scheduling app designed for small groups. Book your court time, invite players, and stay organized — all in one place.
+214 Pickle is a pickleball court scheduling app for groups who share a court. Create your court, invite your players, and manage your schedule — all in one place.
+
+CREATE YOUR COURT
+Own or manage a pickleball court? Create your court in seconds, get a unique court code, and share it with your players to get started.
 
 SHARED CALENDAR
 See all bookings at a glance with a clean month view. Green dots show which days have games scheduled. Tap any day to see the full hour-by-hour schedule.
@@ -15,7 +18,7 @@ Get push notifications and emails when you're added to a game, when a booking is
 FLEXIBLE SCHEDULING
 Book 1 to 4 hour sessions. Players can leave a booking or add others without needing the organizer. The court is yours to manage as a group.
 
-PRIVATE & INVITE-ONLY
-Access is controlled by invite code. Only members with a valid code can join. Your group, your court, your schedule.
+COURT CODE ACCESS
+Each court has a unique code. Share it with your players — only people with the code can see and book your court. Your group, your court, your schedule.
 
-Built for small groups who share a private court. No payments, no ads, no complexity. Just book and play.
+Built for any group who shares a pickleball court. No payments, no ads, no complexity. Just book and play.

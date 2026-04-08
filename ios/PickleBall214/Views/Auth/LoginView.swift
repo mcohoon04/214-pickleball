@@ -4,7 +4,7 @@ import AuthenticationServices
 
 struct LoginView: View {
     @Environment(AuthService.self) var authService
-    @State private var inviteCode = ""
+    @State private var courtCode = ""
     @State private var isCodeValid = false
     @State private var isValidating = false
     @State private var email = ""
@@ -15,6 +15,7 @@ struct LoginView: View {
     @State private var showForgotPassword = false
     @State private var resetEmail = ""
     @State private var resetSent = false
+    @State private var showCreateCourt = false
 
     var body: some View {
         NavigationStack {
@@ -22,7 +23,6 @@ struct LoginView: View {
                 VStack(spacing: 24) {
                     Spacer().frame(height: 40)
 
-                    // App title
                     Text("214 Pickle")
                         .font(.system(size: 36, weight: .bold))
                         .foregroundStyle(Theme.accent)
@@ -34,13 +34,13 @@ struct LoginView: View {
                     Spacer().frame(height: 20)
 
                     if !isCodeValid {
-                        // MARK: - Invite Code Gate
+                        // MARK: - Court Code Gate
                         VStack(spacing: 16) {
-                            Text("Enter your invite code to continue")
+                            Text("Enter your court code to continue")
                                 .font(.subheadline)
                                 .foregroundStyle(Theme.textSecondary)
 
-                            TextField("Invite Code", text: $inviteCode)
+                            TextField("Court Code", text: $courtCode)
                                 .textFieldStyle(.plain)
                                 .textInputAutocapitalization(.characters)
                                 .autocorrectionDisabled()
@@ -74,16 +74,37 @@ struct LoginView: View {
                                 }
                                 .frame(maxWidth: .infinity)
                                 .padding()
-                                .background(inviteCode.isEmpty ? Theme.disabled : Theme.accent)
+                                .background(courtCode.isEmpty ? Theme.disabled : Theme.accent)
                                 .foregroundStyle(Theme.textOnAccent)
                                 .cornerRadius(Theme.cornerRadius)
                             }
-                            .disabled(inviteCode.isEmpty || isValidating)
+                            .disabled(courtCode.isEmpty || isValidating)
+
+                            // Create a court link
+                            HStack {
+                                Rectangle().frame(height: 1).foregroundStyle(Theme.surface)
+                                Text("or").foregroundStyle(Theme.textSecondary).font(.caption)
+                                Rectangle().frame(height: 1).foregroundStyle(Theme.surface)
+                            }
+                            .padding(.top, 8)
+
+                            NavigationLink {
+                                CreateCourtFlowView()
+                                    .environment(authService)
+                            } label: {
+                                HStack {
+                                    Text("Own a court?")
+                                        .foregroundStyle(Theme.textSecondary)
+                                    Text("Create one")
+                                        .foregroundStyle(Theme.accent)
+                                        .fontWeight(.semibold)
+                                }
+                                .font(.subheadline)
+                            }
                         }
                     } else {
                         // MARK: - Sign In (unlocked after valid code)
 
-                        // Email & Password
                         VStack(spacing: 12) {
                             TextField("Email", text: $email)
                                 .textFieldStyle(.plain)
@@ -103,14 +124,12 @@ struct LoginView: View {
                                 .foregroundStyle(Theme.textPrimary)
                         }
 
-                        // Error
                         if let errorMessage {
                             Text(errorMessage)
                                 .font(.caption)
                                 .foregroundStyle(Theme.destructive)
                         }
 
-                        // Sign In button
                         Button {
                             signIn()
                         } label: {
@@ -130,7 +149,6 @@ struct LoginView: View {
                         }
                         .disabled(email.isEmpty || password.isEmpty || isLoading)
 
-                        // Forgot password
                         Button {
                             resetEmail = email
                             showForgotPassword = true
@@ -140,14 +158,12 @@ struct LoginView: View {
                                 .foregroundStyle(Theme.accent)
                         }
 
-                        // Divider
                         HStack {
                             Rectangle().frame(height: 1).foregroundStyle(Theme.surface)
                             Text("or").foregroundStyle(Theme.textSecondary).font(.caption)
                             Rectangle().frame(height: 1).foregroundStyle(Theme.surface)
                         }
 
-                        // Apple Sign In
                         SignInWithAppleButton(.signIn) { request in
                             let nonce = AuthService.randomNonce()
                             currentNonce = nonce
@@ -160,14 +176,12 @@ struct LoginView: View {
                         .frame(height: 50)
                         .cornerRadius(Theme.cornerRadius)
 
-                        // Google Sign In
                         GoogleSignInButton(scheme: .light, style: .wide, action: signInWithGoogle)
                             .frame(height: 50)
                             .cornerRadius(Theme.cornerRadius)
 
                         Spacer()
 
-                        // Sign Up link
                         NavigationLink {
                             SignUpView()
                                 .environment(authService)
@@ -218,13 +232,13 @@ struct LoginView: View {
         Task {
             do {
                 let valid: Bool = try await SupabaseConfig.client
-                    .rpc("validate_invite_code", params: ["p_code": inviteCode])
+                    .rpc("validate_court_code", params: ["p_code": courtCode])
                     .execute()
                     .value
                 if valid {
                     withAnimation { isCodeValid = true }
                 } else {
-                    errorMessage = "Invalid invite code"
+                    errorMessage = "Invalid court code"
                 }
             } catch {
                 errorMessage = error.localizedDescription

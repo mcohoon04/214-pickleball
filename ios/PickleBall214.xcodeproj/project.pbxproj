@@ -28,6 +28,7 @@
 		B7DD25ACCA434BF9603DD7B3 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51E00BF85419181FD7DD94B /* LoginView.swift */; };
 		C46B24BAFBAF0D23AD728AFA /* RealtimeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A9C1A18D7FE5845CA4A12F /* RealtimeService.swift */; };
 		C74D47AAE03E85B6DD0B4291 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5E380A9EE69D0CF502D6965 /* AuthService.swift */; };
+		CF44D1705D6822781775BC93 /* CreateCourtFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C69AE66FC0105ED373D2E09 /* CreateCourtFlowView.swift */; };
 		DEB302D673B04A47609C2099 /* MonthCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C611A6FB32B343B88DDE8C28 /* MonthCalendarView.swift */; };
 		EAB61AEBFC5FA3CEA6BF36DE /* TimeSlotRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0428E1292F05880C7A9FF398 /* TimeSlotRow.swift */; };
 /* End PBXBuildFile section */
@@ -42,6 +43,7 @@
 		51A9C1A18D7FE5845CA4A12F /* RealtimeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealtimeService.swift; sourceTree = "<group>"; };
 		5DD808A8A837CE4D68A68A8B /* PickleBall214App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickleBall214App.swift; sourceTree = "<group>"; };
 		8A8353FAD04739B7E040F3DF /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		9C69AE66FC0105ED373D2E09 /* CreateCourtFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateCourtFlowView.swift; sourceTree = "<group>"; };
 		9E5A815D55AE3A9DF3127DBB /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		A0D364C6FF13A071EF39E69A /* DayCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayCellView.swift; sourceTree = "<group>"; };
 		A5E608C5B97F21EB46F54A8D /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
@@ -132,6 +134,7 @@
 		9B298B6009B20F451F220ED8 /* Auth */ = {
 			isa = PBXGroup;
 			children = (
+				9C69AE66FC0105ED373D2E09 /* CreateCourtFlowView.swift */,
 				B51E00BF85419181FD7DD94B /* LoginView.swift */,
 				DDA74250A403D8D558820ED6 /* SignUpView.swift */,
 			);
@@ -280,6 +283,7 @@
 				6C0FFF618C261D1B33FA328B /* BookingCreateView.swift in Sources */,
 				88A561604133FC429156F421 /* BookingDetailView.swift in Sources */,
 				8438E742E6ABAF0F05EF1812 /* BookingService.swift in Sources */,
+				CF44D1705D6822781775BC93 /* CreateCourtFlowView.swift in Sources */,
 				8D01E8A17AD166B79375AD73 /* DayCellView.swift in Sources */,
 				6C34B77DECDF83F2006923D5 /* DayScheduleView.swift in Sources */,
 				B7DD25ACCA434BF9603DD7B3 /* LoginView.swift in Sources */,
