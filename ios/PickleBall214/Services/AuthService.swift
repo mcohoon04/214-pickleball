@@ -142,6 +142,16 @@ final class AuthService {
         GIDSignIn.sharedInstance.signOut()
     }
 
+    func deleteAccount() async throws {
+        try await supabase.rpc("delete_account").execute()
+        await MainActor.run {
+            self.currentUser = nil
+            self.currentEmail = nil
+            self.isAuthenticated = false
+        }
+        GIDSignIn.sharedInstance.signOut()
+    }
+
     // MARK: - Profile
 
     func loadProfile() async {

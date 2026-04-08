@@ -9,6 +9,8 @@ struct ProfileView: View {
     @State private var isSaving = false
     @State private var errorMessage: String?
     @State private var showSuccess = false
+    @State private var showDeleteConfirm = false
+    @State private var isDeleting = false
 
     var body: some View {
         ScrollView {
@@ -121,6 +123,15 @@ struct ProfileView: View {
                         .foregroundStyle(Theme.destructive)
                         .cornerRadius(Theme.cornerRadius)
                 }
+
+                // Delete account
+                Button {
+                    showDeleteConfirm = true
+                } label: {
+                    Text("Delete Account")
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.destructive.opacity(0.7))
+                }
             }
             .padding(.horizontal, Theme.padding)
         }
@@ -137,6 +148,13 @@ struct ProfileView: View {
             Button("OK") { dismiss() }
         } message: {
             Text("Your profile has been updated.")
+        }
+        .confirmationDialog("Delete Account?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
+            Button("Delete Account", role: .destructive) {
+                deleteAccount()
+            }
+        } message: {
+            Text("This will permanently delete your account, cancel your bookings, and remove all your data. This cannot be undone.")
         }
         .onAppear {
             if let profile = authService.currentUser {
@@ -169,6 +187,19 @@ struct ProfileView: View {
         Task {
             try? await authService.signOut()
             dismiss()
+        }
+    }
+
+    private func deleteAccount() {
+        isDeleting = true
+        Task {
+            do {
+                try await authService.deleteAccount()
+                dismiss()
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isDeleting = false
         }
     }
 }
