@@ -51,7 +51,7 @@
 		B51E00BF85419181FD7DD94B /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		C611A6FB32B343B88DDE8C28 /* MonthCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthCalendarView.swift; sourceTree = "<group>"; };
 		CBA85038A219D461A8F384EA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		D3FEF27963C5D00F8C020A55 /* PickleBall214.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PickleBall214.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D3FEF27963C5D00F8C020A55 /* PickleBall214.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PickleBall214.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DDA74250A403D8D558820ED6 /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
 		E5F4B0B1BE9763FBF8BED8F1 /* Booking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Booking.swift; sourceTree = "<group>"; };
 		EAB6EFBE156AB6DAE2E70E01 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
@@ -233,11 +233,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1530;
-				TargetAttributes = {
-					311736212511019C3B0BAF92 = {
-						DevelopmentTeam = "";
-					};
-				};
 			};
 			buildConfigurationList = 5AD2466413841CA4E29DD347 /* Build configuration list for PBXProject "PickleBall214" */;
 			developmentRegion = en;
@@ -370,6 +365,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = PickleBall214/PickleBall214.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = CJJY27BA49;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PickleBall214/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -388,6 +384,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = PickleBall214/PickleBall214.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = CJJY27BA49;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PickleBall214/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
