@@ -10,6 +10,24 @@ platform :ios do
     )
   end
 
+  desc "Build and upload a TestFlight build (no review submission)"
+  lane :beta do
+    build_app(
+      project: "PickleBall214.xcodeproj",
+      scheme: "PickleBall214",
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "build",
+      clean: true,
+      xcargs: "-allowProvisioningUpdates"
+    )
+    upload_to_testflight(
+      app_identifier: "com.214-pickle",
+      skip_waiting_for_build_processing: true,
+      skip_submission: true
+    )
+  end
+
   desc "Push metadata and screenshots to App Store Connect"
   lane :metadata do
     deliver(
