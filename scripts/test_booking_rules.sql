@@ -12,11 +12,11 @@
 -- ---------------------------------------------------------------------------
 -- Fixtures (committed once for the session): 3 users + a time helper.
 -- ---------------------------------------------------------------------------
-insert into auth.users (instance_id, id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, email_confirmed_at)
+insert into auth.users (id, email, raw_user_meta_data)
 values
-  ('00000000-0000-0000-0000-000000000000', '11111111-1111-1111-1111-111111111111', 'authenticated', 'authenticated', 'alice@test.com', '{}', '{"full_name":"Alice"}', now(), now(), now()),
-  ('00000000-0000-0000-0000-000000000000', '22222222-2222-2222-2222-222222222222', 'authenticated', 'authenticated', 'bob@test.com',   '{}', '{"full_name":"Bob"}',   now(), now(), now()),
-  ('00000000-0000-0000-0000-000000000000', '33333333-3333-3333-3333-333333333333', 'authenticated', 'authenticated', 'carol@test.com', '{}', '{"full_name":"Carol"}', now(), now(), now())
+  ('11111111-1111-1111-1111-111111111111', 'alice@test.com', '{"full_name":"Alice"}'),
+  ('22222222-2222-2222-2222-222222222222', 'bob@test.com',   '{"full_name":"Bob"}'),
+  ('33333333-3333-3333-3333-333333333333', 'carol@test.com', '{"full_name":"Carol"}')
 on conflict (id) do nothing;
 
 -- timestamptz for tomorrow at H:M Toronto time
@@ -31,7 +31,7 @@ $$;
 -- 1. Happy path: 30-minute booking, two real players.
 -- ---------------------------------------------------------------------------
 begin;
-set local request.jwt.claims to '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}';
+select set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
 set local role authenticated;
 do $$
 declare v_b uuid; v_cnt int;
@@ -49,7 +49,7 @@ rollback;
 -- 2. Half-hour START (10:30 -> 11:30).
 -- ---------------------------------------------------------------------------
 begin;
-set local request.jwt.claims to '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}';
+select set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
 set local role authenticated;
 do $$
 declare v_b uuid;
@@ -65,7 +65,7 @@ rollback;
 -- 3. Guests: creator + 3 guests (no cap on guests, total = 4).
 -- ---------------------------------------------------------------------------
 begin;
-set local request.jwt.claims to '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}';
+select set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
 set local role authenticated;
 do $$
 declare v_b uuid; v_total int; v_guests int; v_real int;
@@ -88,7 +88,7 @@ rollback;
 -- 4. Unnamed guest -> stored as 'Guest'.
 -- ---------------------------------------------------------------------------
 begin;
-set local request.jwt.claims to '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}';
+select set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
 set local role authenticated;
 do $$
 declare v_b uuid; v_name text;
@@ -106,7 +106,7 @@ rollback;
 -- 5. Reject :15 start.
 -- ---------------------------------------------------------------------------
 begin;
-set local request.jwt.claims to '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}';
+select set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
 set local role authenticated;
 do $$
 begin
@@ -125,7 +125,7 @@ rollback;
 -- 6. End after 9 PM rejected; 8:30->9:00 PM allowed.
 -- ---------------------------------------------------------------------------
 begin;
-set local request.jwt.claims to '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}';
+select set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
 set local role authenticated;
 do $$
 declare v_b uuid;
@@ -151,7 +151,7 @@ rollback;
 -- 7. Over 4 hours rejected.
 -- ---------------------------------------------------------------------------
 begin;
-set local request.jwt.claims to '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}';
+select set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
 set local role authenticated;
 do $$
 begin
@@ -170,7 +170,7 @@ rollback;
 -- 8. Creator must be a player.
 -- ---------------------------------------------------------------------------
 begin;
-set local request.jwt.claims to '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}';
+select set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
 set local role authenticated;
 do $$
 begin
@@ -189,7 +189,7 @@ rollback;
 -- 9. Fewer than 2 / more than 4 total rejected.
 -- ---------------------------------------------------------------------------
 begin;
-set local request.jwt.claims to '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}';
+select set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
 set local role authenticated;
 do $$
 begin
@@ -218,7 +218,7 @@ rollback;
 -- 10. Overlap rejected.
 -- ---------------------------------------------------------------------------
 begin;
-set local request.jwt.claims to '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}';
+select set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
 set local role authenticated;
 do $$
 begin
@@ -239,24 +239,15 @@ rollback;
 -- 11. Open editing: non-member self-joins (RLS insert).
 -- ---------------------------------------------------------------------------
 begin;
--- Alice creates as definer
-set local request.jwt.claims to '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}';
-do $$
-declare v_b uuid;
-begin
-  v_b := public.create_booking(pg_temp.t(9,0), pg_temp.t(9,30),
-                               array['11111111-1111-1111-1111-111111111111'::uuid,'22222222-2222-2222-2222-222222222222'::uuid]);
-  -- stash booking id in a temp table for the next role
-  create temp table _tb(id uuid) on commit drop;
-  insert into _tb values (v_b);
-end $$;
--- Now act as Carol (NOT a member) and self-join.
-set local request.jwt.claims to '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}';
 set local role authenticated;
 do $$
 declare v_b uuid; v_cnt int;
 begin
-  select id into v_b from _tb;
+  perform set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
+  v_b := public.create_booking(pg_temp.t(9,0), pg_temp.t(9,30),
+                               array['11111111-1111-1111-1111-111111111111'::uuid,'22222222-2222-2222-2222-222222222222'::uuid]);
+  -- Carol (NOT a member) self-joins.
+  perform set_config('request.jwt.claim.sub', '33333333-3333-3333-3333-333333333333', true);
   insert into public.booking_players (booking_id, player_id, added_by)
   values (v_b, '33333333-3333-3333-3333-333333333333', '33333333-3333-3333-3333-333333333333');
   select count(*) into v_cnt from public.booking_players where booking_id = v_b;
@@ -269,22 +260,15 @@ rollback;
 -- 12. Open editing: member adds a guest (RLS insert).
 -- ---------------------------------------------------------------------------
 begin;
-set local request.jwt.claims to '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}';
-do $$
-declare v_b uuid;
-begin
-  v_b := public.create_booking(pg_temp.t(9,0), pg_temp.t(9,30),
-                               array['11111111-1111-1111-1111-111111111111'::uuid,'22222222-2222-2222-2222-222222222222'::uuid]);
-  create temp table _tb(id uuid) on commit drop;
-  insert into _tb values (v_b);
-end $$;
--- Bob (member) adds a guest.
-set local request.jwt.claims to '{"sub":"22222222-2222-2222-2222-222222222222","role":"authenticated"}';
 set local role authenticated;
 do $$
 declare v_b uuid; v_guests int;
 begin
-  select id into v_b from _tb;
+  perform set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
+  v_b := public.create_booking(pg_temp.t(9,0), pg_temp.t(9,30),
+                               array['11111111-1111-1111-1111-111111111111'::uuid,'22222222-2222-2222-2222-222222222222'::uuid]);
+  -- Bob (member) adds a guest.
+  perform set_config('request.jwt.claim.sub', '22222222-2222-2222-2222-222222222222', true);
   insert into public.booking_players (booking_id, player_id, guest_name, added_by)
   values (v_b, null, 'Zed', '22222222-2222-2222-2222-222222222222');
   select count(*) into v_guests from public.booking_players where booking_id = v_b and player_id is null;
@@ -297,21 +281,14 @@ rollback;
 -- 13. Cannot remove the creator (deferred constraint).
 -- ---------------------------------------------------------------------------
 begin;
-set local request.jwt.claims to '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}';
-do $$
-declare v_b uuid;
-begin
-  v_b := public.create_booking(pg_temp.t(9,0), pg_temp.t(9,30),
-                               array['11111111-1111-1111-1111-111111111111'::uuid,'22222222-2222-2222-2222-222222222222'::uuid,'33333333-3333-3333-3333-333333333333'::uuid]);
-  create temp table _tb(id uuid) on commit drop;
-  insert into _tb values (v_b);
-end $$;
-set local request.jwt.claims to '{"sub":"22222222-2222-2222-2222-222222222222","role":"authenticated"}';
 set local role authenticated;
 do $$
 declare v_b uuid;
 begin
-  select id into v_b from _tb;
+  perform set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
+  v_b := public.create_booking(pg_temp.t(9,0), pg_temp.t(9,30),
+                               array['11111111-1111-1111-1111-111111111111'::uuid,'22222222-2222-2222-2222-222222222222'::uuid,'33333333-3333-3333-3333-333333333333'::uuid]);
+  perform set_config('request.jwt.claim.sub', '22222222-2222-2222-2222-222222222222', true);  -- Bob (member)
   begin
     delete from public.booking_players where booking_id = v_b and player_id = '11111111-1111-1111-1111-111111111111';
     set constraints all immediate;  -- force the deferred creator-present check
@@ -327,21 +304,14 @@ rollback;
 -- 14. Member removes another (non-creator) player; cannot drop below 2.
 -- ---------------------------------------------------------------------------
 begin;
-set local request.jwt.claims to '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}';
-do $$
-declare v_b uuid;
-begin
-  v_b := public.create_booking(pg_temp.t(9,0), pg_temp.t(9,30),
-                               array['11111111-1111-1111-1111-111111111111'::uuid,'22222222-2222-2222-2222-222222222222'::uuid,'33333333-3333-3333-3333-333333333333'::uuid]);
-  create temp table _tb(id uuid) on commit drop;
-  insert into _tb values (v_b);
-end $$;
-set local request.jwt.claims to '{"sub":"22222222-2222-2222-2222-222222222222","role":"authenticated"}';
 set local role authenticated;
 do $$
 declare v_b uuid; v_cnt int;
 begin
-  select id into v_b from _tb;
+  perform set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
+  v_b := public.create_booking(pg_temp.t(9,0), pg_temp.t(9,30),
+                               array['11111111-1111-1111-1111-111111111111'::uuid,'22222222-2222-2222-2222-222222222222'::uuid,'33333333-3333-3333-3333-333333333333'::uuid]);
+  perform set_config('request.jwt.claim.sub', '22222222-2222-2222-2222-222222222222', true);  -- Bob (member)
   -- Bob removes Carol (allowed: 3 -> 2)
   delete from public.booking_players where booking_id = v_b and player_id = '33333333-3333-3333-3333-333333333333';
   set constraints all immediate;
@@ -365,22 +335,15 @@ rollback;
 -- 15. Non-member cannot remove a player (RLS blocks; 0 rows deleted).
 -- ---------------------------------------------------------------------------
 begin;
-set local request.jwt.claims to '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}';
-do $$
-declare v_b uuid;
-begin
-  v_b := public.create_booking(pg_temp.t(9,0), pg_temp.t(9,30),
-                               array['11111111-1111-1111-1111-111111111111'::uuid,'22222222-2222-2222-2222-222222222222'::uuid]);
-  create temp table _tb(id uuid) on commit drop;
-  insert into _tb values (v_b);
-end $$;
--- Carol is NOT a member; tries to remove Bob.
-set local request.jwt.claims to '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}';
 set local role authenticated;
 do $$
 declare v_b uuid; v_cnt int;
 begin
-  select id into v_b from _tb;
+  perform set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
+  v_b := public.create_booking(pg_temp.t(9,0), pg_temp.t(9,30),
+                               array['11111111-1111-1111-1111-111111111111'::uuid,'22222222-2222-2222-2222-222222222222'::uuid]);
+  -- Carol is NOT a member; tries to remove Bob.
+  perform set_config('request.jwt.claim.sub', '33333333-3333-3333-3333-333333333333', true);
   delete from public.booking_players where booking_id = v_b and player_id = '22222222-2222-2222-2222-222222222222';
   select count(*) into v_cnt from public.booking_players where booking_id = v_b;
   assert v_cnt = 2, format('expected 2 (delete blocked by RLS), got %s', v_cnt);
@@ -393,7 +356,7 @@ rollback;
 --     Run as postgres (RLS bypassed) so we can count all notifications.
 -- ---------------------------------------------------------------------------
 begin;
-set local request.jwt.claims to '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}';
+select set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
 do $$
 declare v_b uuid; v_emails int; v_null_user int;
 begin
@@ -423,6 +386,42 @@ begin
     if sqlerrm like 'TESTFAIL%' then raise; end if;
     raise notice 'PASS 17: table CHECK rejects :15 start (%)', sqlerrm;
   end;
+end $$;
+rollback;
+
+-- ---------------------------------------------------------------------------
+-- 18. REGRESSION: membership must be scoped to THE booking, not "any booking".
+--     Carol is a member of her own booking C but NOT of Alice+Bob's booking AB.
+--     She must not be able to add to / remove from AB.
+-- ---------------------------------------------------------------------------
+begin;
+set local role authenticated;
+do $$
+declare v_ab uuid; v_cnt int;
+begin
+  perform set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
+  v_ab := public.create_booking(pg_temp.t(9,0), pg_temp.t(9,30),
+                               array['11111111-1111-1111-1111-111111111111'::uuid,'22222222-2222-2222-2222-222222222222'::uuid]);
+  -- Carol creates her own booking C (she is now a member of SOME booking).
+  perform set_config('request.jwt.claim.sub', '33333333-3333-3333-3333-333333333333', true);
+  perform public.create_booking(pg_temp.t(10,0), pg_temp.t(10,30),
+                               array['33333333-3333-3333-3333-333333333333'::uuid,'22222222-2222-2222-2222-222222222222'::uuid]);
+
+  -- (a) Carol (not a member of AB) tries to add a guest to AB -> RLS must block.
+  begin
+    insert into public.booking_players (booking_id, guest_name, added_by)
+    values (v_ab, 'Sneaky', '33333333-3333-3333-3333-333333333333');
+    raise exception 'TESTFAIL: non-member added a guest to a booking they are not in';
+  exception when others then
+    if sqlerrm like 'TESTFAIL%' then raise; end if;
+    raise notice 'PASS 18a: cross-booking member cannot add guest to AB (%)', sqlerrm;
+  end;
+
+  -- (b) Carol tries to remove Bob from AB -> RLS must block (0 rows deleted).
+  delete from public.booking_players where booking_id = v_ab and player_id = '22222222-2222-2222-2222-222222222222';
+  select count(*) into v_cnt from public.booking_players where booking_id = v_ab;
+  assert v_cnt = 2, format('expected AB intact (2), got %s', v_cnt);
+  raise notice 'PASS 18b: cross-booking member cannot remove from AB';
 end $$;
 rollback;
 
