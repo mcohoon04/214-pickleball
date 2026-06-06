@@ -49,6 +49,7 @@ declare
   v_push_enabled boolean;
   v_email_enabled boolean;
   v_local_slot text;
+  v_created_body text;
 begin
   -- Guests have no profile/email/device token — nothing to enqueue.
   if new.player_id is null then
@@ -71,6 +72,13 @@ begin
     'Dy, Mon DD at HH12:MI AM'
   );
 
+  -- Self-join / creator-adds-self reads as a confirmation; otherwise it's an invite.
+  if new.player_id = new.added_by then
+    v_created_body := format('Your game is booked for %s.', v_local_slot);
+  else
+    v_created_body := format('%s added you to a game at %s.', coalesce(v_actor_name, 'A player'), v_local_slot);
+  end if;
+
   -- Reminder for every player (including creator).
   if coalesce(v_push_enabled, true) then
     insert into public.notifications (user_id, booking_id, type, channel, title, body, scheduled_for)
@@ -87,7 +95,7 @@ begin
     insert into public.notifications (user_id, booking_id, type, channel, title, body, scheduled_for)
     values (
       new.player_id, new.booking_id, 'booking_created', 'push', 'New pickleball booking',
-      format('%s booked a game at %s.', coalesce(v_actor_name, 'A player'), v_local_slot),
+      v_created_body,
       timezone('utc', now())
     )
     on conflict do nothing;
@@ -98,7 +106,7 @@ begin
     insert into public.notifications (user_id, booking_id, type, channel, title, body, scheduled_for)
     values (
       new.player_id, new.booking_id, 'booking_created', 'email', 'New pickleball booking',
-      format('%s booked a game at %s.', coalesce(v_actor_name, 'A player'), v_local_slot),
+      v_created_body,
       timezone('utc', now())
     )
     on conflict do nothing;
