@@ -1,5 +1,5 @@
--- Seed invite code for local development
-insert into public.invite_codes (code) values ('PICKLE214');
+-- Seed court code for local development (table was renamed invite_codes -> court_codes)
+insert into public.court_codes (code, court_name) values ('PICKLE214', '214 Pickle');
 
 -- Vault secrets for local cron job (matches supabase start output)
 -- The project_url uses Docker internal host since Postgres runs in a container

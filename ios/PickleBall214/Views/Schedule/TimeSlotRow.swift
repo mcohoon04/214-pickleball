@@ -16,19 +16,30 @@ struct TimeSlotRow: View {
 
     private var isBookingStart: Bool {
         guard let bwp = slot.booking else { return false }
-        let cal = Calendar.current
-        return cal.component(.hour, from: bwp.booking.startsAt) == slot.hour
+        return abs(bwp.booking.startsAt.timeIntervalSince(slot.date)) < 1
     }
 
     private var bookingDurationLabel: String? {
         guard isBookingStart, let bwp = slot.booking else { return nil }
-        let hours = Calendar.current.dateComponents([.hour], from: bwp.booking.startsAt, to: bwp.booking.endsAt).hour ?? 1
-        return hours > 1 ? "\(hours)hr" : nil
+        let mins = Int(bwp.booking.endsAt.timeIntervalSince(bwp.booking.startsAt) / 60)
+        guard mins > 30 else { return nil }
+        let h = mins / 60
+        let m = mins % 60
+        if h == 0 { return "\(m)m" }
+        if m == 0 { return "\(h)hr" }
+        return "\(h)hr \(m)m"
+    }
+
+    private var playersLabel: String {
+        guard let bwp = slot.booking else { return "" }
+        return bwp.players
+            .map { $0.isGuest ? "\($0.displayName) (guest)" : $0.displayName }
+            .joined(separator: ", ")
     }
 
     private static let hourFormatter: DateFormatter = {
         let f = DateFormatter()
-        f.dateFormat = "h a"
+        f.dateFormat = "h:mm a"
         f.timeZone = TimeZone(identifier: "America/Toronto")
         return f
     }()
@@ -42,14 +53,13 @@ struct TimeSlotRow: View {
             }
         } label: {
             HStack(spacing: 12) {
-                // Hour label
+                // Time label
                 Text(Self.hourFormatter.string(from: slot.date))
-                    .font(.system(size: 14, weight: .medium, design: .monospaced))
+                    .font(.system(size: 13, weight: .medium, design: .monospaced))
                     .foregroundStyle(isPast ? Theme.disabled : Theme.textSecondary)
-                    .frame(width: 50, alignment: .trailing)
+                    .frame(width: 64, alignment: .trailing)
 
                 if slot.isAvailable {
-                    // Available slot
                     HStack {
                         Text("Available")
                             .font(.subheadline)
@@ -64,8 +74,7 @@ struct TimeSlotRow: View {
                     .padding(.vertical, 14)
                     .background(Theme.surface)
                     .cornerRadius(Theme.cornerRadius)
-                } else if let bwp = slot.booking {
-                    // Booked slot
+                } else if let _ = slot.booking {
                     HStack {
                         Rectangle()
                             .fill(Theme.accent)
@@ -89,7 +98,7 @@ struct TimeSlotRow: View {
                                 }
                             }
                             if isBookingStart {
-                                Text(bwp.players.map(\.displayName).joined(separator: ", "))
+                                Text(playersLabel)
                                     .font(.subheadline)
                                     .foregroundStyle(Theme.textPrimary)
                                     .lineLimit(1)
