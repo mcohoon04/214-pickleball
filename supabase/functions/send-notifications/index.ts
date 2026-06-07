@@ -1,4 +1,13 @@
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2";
+import {
+  buildEmailHtml,
+  buildGoogleCalUrl,
+  buildICS,
+  buildOutlookUrl,
+  CAL_LOCATION,
+  CAL_SUMMARY,
+  toBase64,
+} from "./ics.ts";
 
 // --- APNs JWT helpers ---
 
@@ -105,16 +114,111 @@ async function sendPush(
   };
 }
 
+// --- Calendar invite (.ics) for a booking email ---
+
+interface CalendarAttachment {
+  icsContent: string;
+  method: "PUBLISH" | "CANCEL";
+  links?: { google: string; outlook: string };
+}
+
+/**
+ * Build the .ics + "add to calendar" links for a booking notification email.
+ * Returns undefined if the booking can't be found. Never throws — the email
+ * must go out even if calendar generation fails.
+ */
+async function buildCalendarForBooking(
+  supabase: SupabaseClient,
+  bookingId: string,
+  type: string
+): Promise<CalendarAttachment | undefined> {
+  const { data: booking } = await supabase
+    .from("bookings")
+    .select("id, starts_at, ends_at")
+    .eq("id", bookingId)
+    .maybeSingle();
+  if (!booking) return undefined;
+
+  // Participant names: real players (by profile) + guests (by guest_name).
+  const { data: bps } = await supabase
+    .from("booking_players")
+    .select("player_id, guest_name")
+    .eq("booking_id", bookingId);
+
+  const rows = bps ?? [];
+  const realIds = rows
+    .filter((p: { player_id: string | null }) => p.player_id)
+    .map((p: { player_id: string }) => p.player_id);
+
+  const nameById: Record<string, string> = {};
+  if (realIds.length > 0) {
+    const { data: profs } = await supabase
+      .from("profiles")
+      .select("id, display_name")
+      .in("id", realIds);
+    for (const p of profs ?? []) nameById[p.id] = p.display_name;
+  }
+
+  const names = rows.map((p: { player_id: string | null; guest_name: string | null }) =>
+    p.player_id ? nameById[p.player_id] ?? "Player" : `${p.guest_name} (guest)`
+  );
+
+  const start = new Date(booking.starts_at);
+  const end = new Date(booking.ends_at);
+  const description = names.length ? `Players: ${names.join(", ")}` : "Pickleball game";
+  const isCancel = type === "booking_cancelled";
+  const method: "PUBLISH" | "CANCEL" = isCancel ? "CANCEL" : "PUBLISH";
+
+  const icsContent = buildICS({
+    uid: `${bookingId}@214-pickle.com`,
+    method,
+    sequence: isCancel ? 1 : 0,
+    start,
+    end,
+    summary: CAL_SUMMARY,
+    location: CAL_LOCATION,
+    description: isCancel ? "This pickleball game was cancelled." : description,
+    cancelled: isCancel,
+  });
+
+  const links = isCancel
+    ? undefined
+    : {
+        google: buildGoogleCalUrl(start, end, CAL_SUMMARY, description, CAL_LOCATION),
+        outlook: buildOutlookUrl(start, end, CAL_SUMMARY, description, CAL_LOCATION),
+      };
+
+  return { icsContent, method, links };
+}
+
 // --- Send email via Resend ---
 
 async function sendEmail(
   to: string,
   subject: string,
-  body: string
+  body: string,
+  calendar?: CalendarAttachment
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   const apiKey = Deno.env.get("RESEND_API_KEY")!;
   const fromEmail =
     Deno.env.get("RESEND_FROM_EMAIL") ?? "noreply@send.214-pickle.com";
+
+  const payload: Record<string, unknown> = {
+    from: fromEmail,
+    to,
+    subject,
+    html: buildEmailHtml(subject, body, calendar?.links),
+  };
+
+  if (calendar) {
+    payload.attachments = [
+      {
+        filename: "invite.ics",
+        content: toBase64(calendar.icsContent),
+        content_type: `text/calendar; charset=utf-8; method=${calendar.method}`,
+      },
+    ];
+  }
 
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -122,12 +226,7 @@ async function sendEmail(
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
-    body: JSON.stringify({
-      from: fromEmail,
-      to,
-      subject,
-      html: `<p>${body}</p>`,
-    }),
+    body: JSON.stringify(payload),
   });
 
   const data = await res.json();
@@ -210,7 +309,23 @@ Deno.serve(async (_req: Request) => {
         if (!email) {
           errorMsg = "No email address";
         } else {
-          const result = await sendEmail(email, notif.title, notif.body);
+          // Attach a calendar invite (.ics) for booking created/cancelled emails.
+          let calendar: CalendarAttachment | undefined;
+          if (
+            notif.booking_id &&
+            (notif.type === "booking_created" || notif.type === "booking_cancelled")
+          ) {
+            try {
+              calendar = await buildCalendarForBooking(
+                supabase,
+                notif.booking_id,
+                notif.type
+              );
+            } catch (_e) {
+              calendar = undefined; // never block the email on calendar build failure
+            }
+          }
+          const result = await sendEmail(email, notif.title, notif.body, calendar);
           success = result.success;
           providerId = result.id ?? "";
           if (!success) errorMsg = result.error ?? "unknown";

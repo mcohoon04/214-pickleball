@@ -1,11 +1,17 @@
 import SwiftUI
 
+private struct GuestEntry: Identifiable, Hashable {
+    let id = UUID()
+    var name: String = ""
+}
+
 struct BookingCreateView: View {
     let slot: TimeSlot
     @Binding var path: NavigationPath
     @Environment(BookingService.self) var bookingService
     @Environment(AuthService.self) var authService
     @State private var selectedPlayerIds: Set<UUID> = []
+    @State private var guests: [GuestEntry] = []
     @State private var selectedEndTime: Date?
     @State private var isLoading = false
     @State private var errorMessage: String?
@@ -19,13 +25,13 @@ struct BookingCreateView: View {
 
     private static let timeFormatter: DateFormatter = {
         let f = DateFormatter()
-        f.dateFormat = "h a"
+        f.dateFormat = "h:mm a"
         f.timeZone = TimeZone(identifier: "America/Toronto")
         return f
     }()
 
     private var availableEndTimes: [Date] {
-        bookingService.availableEndTimes(date: slot.date, startHour: slot.hour)
+        bookingService.availableEndTimes(start: slot.date)
     }
 
     private var endTimeLabel: String {
@@ -33,10 +39,17 @@ struct BookingCreateView: View {
         return Self.timeFormatter.string(from: end)
     }
 
-    private var durationHours: Int {
-        guard let end = selectedEndTime else { return 0 }
-        let cal = Calendar.current
-        return cal.dateComponents([.hour], from: slot.date, to: end).hour ?? 0
+    private var totalCount: Int {
+        selectedPlayerIds.count + guests.count
+    }
+
+    private func durationLabel(to end: Date) -> String {
+        let mins = max(0, Int(end.timeIntervalSince(slot.date) / 60))
+        let h = mins / 60
+        let m = mins % 60
+        if h == 0 { return "\(m) min" }
+        if m == 0 { return "\(h) hr" }
+        return "\(h) hr \(m) min"
     }
 
     var body: some View {
@@ -48,7 +61,6 @@ struct BookingCreateView: View {
                     .foregroundStyle(Theme.textPrimary)
 
                 HStack(spacing: 8) {
-                    // Start time (fixed)
                     Text(Self.timeFormatter.string(from: slot.date))
                         .font(.title2.bold())
                         .foregroundStyle(Theme.accent)
@@ -56,7 +68,6 @@ struct BookingCreateView: View {
                     Text("to")
                         .foregroundStyle(Theme.textSecondary)
 
-                    // End time (dropdown)
                     Menu {
                         ForEach(availableEndTimes, id: \.self) { endTime in
                             Button {
@@ -64,8 +75,7 @@ struct BookingCreateView: View {
                             } label: {
                                 HStack {
                                     Text(Self.timeFormatter.string(from: endTime))
-                                    let hours = Calendar.current.dateComponents([.hour], from: slot.date, to: endTime).hour ?? 0
-                                    Text("(\(hours)hr)")
+                                    Text("(\(durationLabel(to: endTime)))")
                                         .foregroundStyle(.secondary)
                                 }
                             }
@@ -86,28 +96,28 @@ struct BookingCreateView: View {
                     }
                 }
 
-                if durationHours > 0 {
-                    Text("\(durationHours) hour\(durationHours > 1 ? "s" : "")")
+                if let end = selectedEndTime {
+                    Text(durationLabel(to: end))
                         .font(.subheadline)
                         .foregroundStyle(Theme.textSecondary)
                 }
             }
             .padding(.vertical, 20)
 
-            // Player selection
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
-                        Text("Select Players")
+                        Text("Players")
                             .font(.headline)
                             .foregroundStyle(Theme.textPrimary)
                         Spacer()
-                        Text("\(selectedPlayerIds.count)/4")
+                        Text("\(totalCount)/4")
                             .font(.subheadline)
-                            .foregroundStyle(selectedPlayerIds.count >= 2 ? Theme.accent : Theme.textSecondary)
+                            .foregroundStyle(totalCount >= 2 ? Theme.accent : Theme.textSecondary)
                     }
                     .padding(.horizontal, Theme.padding)
 
+                    // Registered players
                     ForEach(bookingService.allPlayers) { player in
                         let isCurrentUser = player.id == authService.currentUser?.id
                         let isSelected = selectedPlayerIds.contains(player.id)
@@ -116,7 +126,7 @@ struct BookingCreateView: View {
                             if !isCurrentUser {
                                 if isSelected {
                                     selectedPlayerIds.remove(player.id)
-                                } else if selectedPlayerIds.count < 4 {
+                                } else if totalCount < 4 {
                                     selectedPlayerIds.insert(player.id)
                                 }
                             }
@@ -152,10 +162,68 @@ struct BookingCreateView: View {
                         }
                         .disabled(isCurrentUser)
                     }
+
+                    // Guests
+                    if !guests.isEmpty {
+                        Text("Guests")
+                            .font(.subheadline.bold())
+                            .foregroundStyle(Theme.textSecondary)
+                            .padding(.horizontal, Theme.padding)
+                            .padding(.top, 4)
+                    }
+
+                    ForEach($guests) { $guest in
+                        HStack(spacing: 12) {
+                            Circle()
+                                .fill(Theme.surfaceLight)
+                                .frame(width: 40, height: 40)
+                                .overlay(
+                                    Image(systemName: "person.crop.circle.badge.questionmark")
+                                        .foregroundStyle(Theme.textSecondary)
+                                )
+
+                            TextField("Guest name (optional)", text: $guest.name)
+                                .textInputAutocapitalization(.words)
+                                .foregroundStyle(Theme.textPrimary)
+
+                            Button {
+                                guests.removeAll { $0.id == guest.id }
+                            } label: {
+                                Image(systemName: "minus.circle.fill")
+                                    .foregroundStyle(Theme.destructive)
+                                    .font(.title3)
+                            }
+                        }
+                        .padding(.horizontal, Theme.padding)
+                        .padding(.vertical, 8)
+                    }
+
+                    // Add guest
+                    Button {
+                        if totalCount < 4 {
+                            guests.append(GuestEntry())
+                        }
+                    } label: {
+                        HStack(spacing: 12) {
+                            Circle()
+                                .strokeBorder(Theme.accent, lineWidth: 1.5)
+                                .frame(width: 40, height: 40)
+                                .overlay(
+                                    Image(systemName: "plus")
+                                        .foregroundStyle(Theme.accent)
+                                )
+                            Text("Add Guest")
+                                .foregroundStyle(Theme.accent)
+                            Spacer()
+                        }
+                        .padding(.horizontal, Theme.padding)
+                        .padding(.vertical, 8)
+                    }
+                    .disabled(totalCount >= 4)
+                    .opacity(totalCount >= 4 ? 0.4 : 1)
                 }
             }
 
-            // Error
             if let errorMessage {
                 Text(errorMessage)
                     .font(.caption)
@@ -163,7 +231,6 @@ struct BookingCreateView: View {
                     .padding(.horizontal, Theme.padding)
             }
 
-            // Book button
             Button {
                 createBooking()
             } label: {
@@ -192,15 +259,14 @@ struct BookingCreateView: View {
             if let userId = authService.currentUser?.id {
                 selectedPlayerIds.insert(userId)
             }
-            // Default to 1 hour
-            if let firstEnd = availableEndTimes.first {
+            if selectedEndTime == nil, let firstEnd = availableEndTimes.first {
                 selectedEndTime = firstEnd
             }
         }
     }
 
     private var canBook: Bool {
-        selectedPlayerIds.count >= 2 && selectedEndTime != nil
+        totalCount >= 2 && totalCount <= 4 && selectedEndTime != nil
     }
 
     private func createBooking() {
@@ -212,7 +278,8 @@ struct BookingCreateView: View {
                 _ = try await bookingService.createBooking(
                     startsAt: slot.date,
                     endsAt: endTime,
-                    playerIds: Array(selectedPlayerIds)
+                    playerIds: Array(selectedPlayerIds),
+                    guestNames: guests.map(\.name)
                 )
                 path.removeLast(path.count)
             } catch {
