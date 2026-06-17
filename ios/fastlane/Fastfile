@@ -49,10 +49,34 @@ platform :ios do
     )
   end
 
-  desc "Push metadata and submit for review"
-  lane :submit do
+  desc "Submit the already-prepared version for review (no metadata/binary re-upload)"
+  lane :resubmit do
+    version = get_info_plist_value(path: "PickleBall214/Info.plist", key: "CFBundleShortVersionString")
     deliver(
       app_identifier: "com.214-pickle",
+      app_version: version,
+      skip_binary_upload: true,
+      skip_metadata: true,
+      skip_screenshots: true,
+      submit_for_review: true,
+      force: true,
+      automatic_release: false,
+      precheck_include_in_app_purchases: false,
+      submission_information: {
+        export_compliance_uses_encryption: false,
+        export_compliance_is_exempt: false,
+        export_compliance_contains_proprietary_cryptography: false,
+        export_compliance_contains_third_party_cryptography: false
+      }
+    )
+  end
+
+  desc "Push metadata and submit for review"
+  lane :submit do
+    version = get_info_plist_value(path: "PickleBall214/Info.plist", key: "CFBundleShortVersionString")
+    deliver(
+      app_identifier: "com.214-pickle",
+      app_version: version,
       skip_binary_upload: true,
       skip_screenshots: false,
       overwrite_screenshots: true,

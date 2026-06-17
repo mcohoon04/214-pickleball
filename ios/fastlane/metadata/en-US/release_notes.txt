@@ -1,0 +1,6 @@
+What's new in 1.1:
+
+• Guests — add guests to a booking, perfect for friends who aren't on the app yet.
+• 30-minute slots — book on the hour or half hour for more flexibility.
+• Open editing — anyone can join a booking or add and remove players, not just the organizer.
+• Calendar invites — booking emails now include a calendar invite plus add-to-calendar links.
