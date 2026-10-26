@@ -8,6 +8,14 @@ import {
   CAL_SUMMARY,
   toBase64,
 } from "./ics.ts";
+import {
+  apnsExpiration,
+  BATCH_SIZE,
+  fetchWithTimeout,
+  ReminderBooking,
+  reminderSkipReason,
+  RUN_BUDGET_MS,
+} from "./rules.ts";
 
 // --- APNs JWT helpers ---
 
@@ -82,7 +90,8 @@ async function getApnsToken(): Promise<string> {
 async function sendPush(
   deviceToken: string,
   title: string,
-  body: string
+  body: string,
+  opts: { collapseId: string; expiration?: string }
 ): Promise<{ success: boolean; status: number; error?: string }> {
   const bundleId = Deno.env.get("APNS_BUNDLE_ID")!;
   const sandbox = Deno.env.get("APNS_SANDBOX") === "true";
@@ -91,13 +100,16 @@ async function sendPush(
     : "api.push.apple.com";
   const jwt = await getApnsToken();
 
-  const res = await fetch(`https://${host}/3/device/${deviceToken}`, {
+  const res = await fetchWithTimeout(`https://${host}/3/device/${deviceToken}`, {
     method: "POST",
     headers: {
       authorization: `bearer ${jwt}`,
       "apns-topic": bundleId,
       "apns-push-type": "alert",
       "apns-priority": "10",
+      // Same id on a retry replaces (rather than duplicates) the alert on-device.
+      "apns-collapse-id": opts.collapseId,
+      ...(opts.expiration ? { "apns-expiration": opts.expiration } : {}),
       "content-type": "application/json",
     },
     body: JSON.stringify({
@@ -220,7 +232,7 @@ async function sendEmail(
     ];
   }
 
-  const res = await fetch("https://api.resend.com/emails", {
+  const res = await fetchWithTimeout("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -234,26 +246,57 @@ async function sendEmail(
   return { success: false, error: data.message ?? "unknown" };
 }
 
+// --- Queue helpers ---
+
+// Write a status change. Log rather than throw: an unwritten final status leaves
+// the row "processing", and claim_notifications() reclaims it later.
+async function setStatus(
+  supabase: SupabaseClient,
+  id: string,
+  fields: Record<string, unknown>
+): Promise<void> {
+  const { error } = await supabase.from("notifications").update(fields).eq("id", id);
+  if (error) console.error(`notification ${id}: status update failed: ${error.message}`);
+}
+
+// Current state of a reminder's booking, read right before sending.
+async function loadReminderBooking(
+  supabase: SupabaseClient,
+  bookingId: string
+): Promise<ReminderBooking | undefined> {
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("starts_at, status, booking_players(player_id)")
+    .eq("id", bookingId)
+    .maybeSingle();
+  if (error) throw new Error(`Booking lookup failed: ${error.message}`);
+  if (!data) return undefined;
+  return {
+    starts_at: data.starts_at,
+    status: data.status,
+    player_ids: (data.booking_players ?? [])
+      .map((p: { player_id: string | null }) => p.player_id)
+      .filter((id: string | null): id is string => id !== null),
+  };
+}
+
 // --- Main handler ---
 
 Deno.serve(async (_req: Request) => {
+  const startedAt = Date.now();
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
-  // Fetch pending notifications ready to send
-  const { data: notifications, error: fetchErr } = await supabase
-    .from("notifications")
-    .select("*")
-    .in("status", ["pending", "failed"])
-    .lte("scheduled_for", new Date().toISOString())
-    .lt("retry_count", 3)
-    .order("scheduled_for", { ascending: true })
-    .limit(50);
+  // Atomically claim due rows, incl. rows a dead run left "processing".
+  const { data: notifications, error: claimErr } = await supabase.rpc(
+    "claim_notifications",
+    { p_limit: BATCH_SIZE }
+  );
 
-  if (fetchErr) {
-    return new Response(JSON.stringify({ error: fetchErr.message }), {
+  if (claimErr) {
+    return new Response(JSON.stringify({ error: claimErr.message }), {
       status: 500,
     });
   }
@@ -262,19 +305,42 @@ Deno.serve(async (_req: Request) => {
     return new Response(JSON.stringify({ processed: 0 }), { status: 200 });
   }
 
-  // Mark as processing
-  const ids = notifications.map((n: { id: string }) => n.id);
-  await supabase.from("notifications").update({ status: "processing" }).in("id", ids);
-
   let sent = 0;
   let failed = 0;
+  let skipped = 0;
+  let released = 0;
 
   for (const notif of notifications) {
+    // Out of time: hand the rest back instead of risking the wall-clock kill.
+    if (Date.now() - startedAt > RUN_BUDGET_MS) {
+      await setStatus(supabase, notif.id, { status: "pending" });
+      released++;
+      continue;
+    }
+
     let success = false;
     let errorMsg = "";
     let providerId = "";
 
     try {
+      // Re-check reminders right before sending: the game may have been
+      // cancelled or started, or the player removed, since it was queued.
+      let reminderBooking: ReminderBooking | undefined;
+      if (notif.type === "booking_reminder") {
+        reminderBooking = notif.booking_id
+          ? await loadReminderBooking(supabase, notif.booking_id)
+          : undefined;
+        const skipReason = reminderSkipReason(notif, reminderBooking, new Date());
+        if (skipReason) {
+          await setStatus(supabase, notif.id, {
+            status: "skipped",
+            error_message: skipReason,
+          });
+          skipped++;
+          continue;
+        }
+      }
+
       if (notif.channel === "push") {
         // Get device token from profiles
         const { data: profile } = await supabase
@@ -287,7 +353,12 @@ Deno.serve(async (_req: Request) => {
         if (!token) {
           errorMsg = "No device token";
         } else {
-          const result = await sendPush(token, notif.title, notif.body);
+          const result = await sendPush(token, notif.title, notif.body, {
+            collapseId: notif.id,
+            expiration: reminderBooking
+              ? apnsExpiration(reminderBooking.starts_at)
+              : undefined,
+          });
           success = result.success;
           if (!success) {
             errorMsg = result.error ?? `HTTP ${result.status}`;
@@ -336,30 +407,24 @@ Deno.serve(async (_req: Request) => {
     }
 
     if (success) {
-      await supabase
-        .from("notifications")
-        .update({
-          status: "sent",
-          sent_at: new Date().toISOString(),
-          provider_message_id: providerId || null,
-        })
-        .eq("id", notif.id);
+      await setStatus(supabase, notif.id, {
+        status: "sent",
+        sent_at: new Date().toISOString(),
+        provider_message_id: providerId || null,
+      });
       sent++;
     } else {
-      await supabase
-        .from("notifications")
-        .update({
-          status: "failed",
-          error_message: errorMsg,
-          retry_count: (notif.retry_count ?? 0) + 1,
-        })
-        .eq("id", notif.id);
+      await setStatus(supabase, notif.id, {
+        status: "failed",
+        error_message: errorMsg,
+        retry_count: (notif.retry_count ?? 0) + 1,
+      });
       failed++;
     }
   }
 
   return new Response(
-    JSON.stringify({ processed: notifications.length, sent, failed }),
+    JSON.stringify({ processed: notifications.length, sent, failed, skipped, released }),
     { status: 200, headers: { "Content-Type": "application/json" } }
   );
 });
