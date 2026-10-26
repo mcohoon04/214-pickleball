@@ -12,6 +12,7 @@ import {
   apnsExpiration,
   BATCH_SIZE,
   fetchWithTimeout,
+  isCronRequest,
   ReminderBooking,
   reminderSkipReason,
   RUN_BUDGET_MS,
@@ -282,8 +283,12 @@ async function loadReminderBooking(
 
 // --- Main handler ---
 
-Deno.serve(async (_req: Request) => {
+Deno.serve(async (req: Request) => {
   const startedAt = Date.now();
+  if (!isCronRequest(req, Deno.env.get("CRON_SECRET"))) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  }
+
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
