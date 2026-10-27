@@ -49,3 +49,20 @@ export function fetchWithTimeout(
 export function apnsExpiration(startsAt: string): string {
   return String(Math.floor(new Date(startsAt).getTime() / 1000));
 }
+
+/**
+ * Only the pg_cron job may trigger the worker: it POSTs with `x-cron-secret`
+ * (from Vault) matching the CRON_SECRET function secret. The gateway's JWT
+ * check alone would also admit any signed-in app user. Fails closed if
+ * CRON_SECRET isn't configured.
+ */
+export function isCronRequest(req: Request, secret: string | undefined): boolean {
+  if (!secret || req.method !== "POST") return false;
+  const given = new TextEncoder().encode(req.headers.get("x-cron-secret") ?? "");
+  const expected = new TextEncoder().encode(secret);
+  if (given.length !== expected.length) return false;
+  // Constant-time compare, so response timing doesn't leak how much matched.
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) diff |= given[i] ^ expected[i];
+  return diff === 0;
+}

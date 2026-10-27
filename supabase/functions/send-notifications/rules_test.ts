@@ -8,6 +8,7 @@ import {
   apnsExpiration,
   BATCH_SIZE,
   fetchWithTimeout,
+  isCronRequest,
   reminderSkipReason,
   RUN_BUDGET_MS,
   SEND_TIMEOUT_MS,
@@ -16,6 +17,37 @@ import {
 const NOW = new Date("2026-10-20T11:02:00Z");
 const PLAYER = "11111111-1111-1111-1111-111111111111";
 const OTHER = "22222222-2222-2222-2222-222222222222";
+
+// --- isCronRequest ---
+
+const SECRET = "s3cr3t-value-for-tests";
+const req = (method: string, secret?: string) =>
+  new Request("http://localhost/send-notifications", {
+    method,
+    headers: secret === undefined ? {} : { "x-cron-secret": secret },
+  });
+
+Deno.test("isCronRequest -> accepts POST with the cron secret", () => {
+  assert(isCronRequest(req("POST", SECRET), SECRET));
+});
+
+Deno.test("isCronRequest -> rejects a missing secret header", () => {
+  assert(!isCronRequest(req("POST"), SECRET));
+});
+
+Deno.test("isCronRequest -> rejects a wrong secret", () => {
+  assert(!isCronRequest(req("POST", "s3cr3t-value-for-testz"), SECRET));
+  assert(!isCronRequest(req("POST", "short"), SECRET));
+});
+
+Deno.test("isCronRequest -> rejects non-POST methods", () => {
+  assert(!isCronRequest(req("GET", SECRET), SECRET));
+});
+
+Deno.test("isCronRequest -> fails closed when CRON_SECRET is not configured", () => {
+  assert(!isCronRequest(req("POST", ""), undefined));
+  assert(!isCronRequest(req("POST", ""), ""));
+});
 
 // --- run budget ---
 
